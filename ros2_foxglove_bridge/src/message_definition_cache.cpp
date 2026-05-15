@@ -215,6 +215,10 @@ const MessageSpec& MessageDefinitionCache::load_message_spec(
   }
 
   // Get the package share directory, or throw a PackageNotFoundError
+  // Suppress deprecation warnings for ament_index_cpp APIs whose newer alternatives
+  // (get_package_share_path / pair-returning get_resource) only exist on lyrical+.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   const std::string share_dir = ament_index_cpp::get_package_share_directory(package);
 
   // Get the rosidl_interfaces index contents for this package
@@ -222,6 +226,7 @@ const MessageSpec& MessageDefinitionCache::load_message_spec(
   if (!ament_index_cpp::get_resource("rosidl_interfaces", package, index_contents)) {
     throw DefinitionNotFoundError(definition_identifier.package_resource_name);
   }
+#pragma GCC diagnostic pop
 
   // Find the first line that ends with the filename we're looking for
   const auto lines = split_string(index_contents);
